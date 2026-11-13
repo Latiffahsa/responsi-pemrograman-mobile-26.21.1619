@@ -46,3 +46,12 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Konfigurasi rahasia
+.env
+
+# Konfigurasi rahasia
+.env
+
+# Konfigurasi rahasia
+.env
