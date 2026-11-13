@@ -5,14 +5,18 @@ import '../providers/app_provider.dart';
 import '../utils/validators.dart';
 import '../widgets/profile_card.dart';
 
+/// Layar profil mahasiswa beserta tombol edit.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  Future<void> _showEditDialog(BuildContext context) async {
+  // DIUBAH: sebelumnya _showEditDialog memakai showDialog.
+  Future<void> _openEditScreen(BuildContext context) async {
     final provider = AppProvider.of(context);
-    final updated = await showDialog<Student>(
-      context: context,
-      builder: (_) => _EditProfileDialog(student: provider.student),
+    final updated = await Navigator.push<Student>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _EditProfileScreen(student: provider.student),
+      ),
     );
     if (updated != null) {
       provider.updateStudent(updated);
@@ -36,7 +40,7 @@ class ProfileScreen extends StatelessWidget {
             ProfileCard(student: student),
             const SizedBox(height: 16),
             FilledButton.icon(
-              onPressed: () => _showEditDialog(context),
+              onPressed: () => _openEditScreen(context), // DIUBAH
               icon: const Icon(Icons.edit),
               label: const Text('Edit Profil'),
             ),
@@ -47,16 +51,17 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-class _EditProfileDialog extends StatefulWidget {
-  const _EditProfileDialog({required this.student});
+// DIUBAH: sebelumnya _EditProfileDialog (AlertDialog), sekarang layar penuh.
+class _EditProfileScreen extends StatefulWidget {
+  const _EditProfileScreen({required this.student});
 
   final Student student;
 
   @override
-  State<_EditProfileDialog> createState() => _EditProfileDialogState();
+  State<_EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _EditProfileDialogState extends State<_EditProfileDialog> {
+class _EditProfileScreenState extends State<_EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _name;
   late final TextEditingController _nim;
@@ -94,49 +99,55 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
     );
   }
 
+  // DIUBAH: build ditulis ulang menjadi Scaffold layar penuh.
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Edit Profil'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Edit Profil')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _name,
                 decoration: const InputDecoration(labelText: 'Nama'),
                 validator: (v) => Validators.validateRequired(v, 'Nama'),
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _nim,
                 decoration: const InputDecoration(labelText: 'NIM'),
                 validator: (v) => Validators.validateRequired(v, 'NIM'),
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _prodi,
                 decoration: const InputDecoration(labelText: 'Program Studi'),
                 validator: (v) =>
                     Validators.validateRequired(v, 'Program studi'),
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(labelText: 'Email'),
                 validator: Validators.validateEmail,
               ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _save,
+                  child: const Text('Simpan'),
+                ),
+              ),
             ],
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Batal'),
-        ),
-        FilledButton(onPressed: _save, child: const Text('Simpan')),
-      ],
     );
   }
 }
